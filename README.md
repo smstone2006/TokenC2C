@@ -45,17 +45,14 @@ One user can be both a consumer and a provider. **Token** refers to AI usage uni
 
 ## How it works
 
-```mermaid
-flowchart LR
-  P[Provider adds an account] --> V[Upstream verification]
-  V --> S[Shared account pool]
-  C[Consumer API key] --> G[Gateway and scheduler]
-  G --> S
-  S --> U[Billed usage]
-  U --> B[Buyer charge]
-  U --> E[Provider pending credits]
-  U --> F[Platform fee]
-  E --> A[Available credits after 24 hours]
+```text
+Provider account -> Upstream verification -> Shared account pool
+Consumer API key -> Gateway and scheduler -> Shared pool -> Billed usage
+
+Billed usage
+  |-- Buyer charge
+  |-- Provider pending credits -> Available credits after 24 hours
+  `-- Platform fee
 ```
 
 ### Current accounting rules
