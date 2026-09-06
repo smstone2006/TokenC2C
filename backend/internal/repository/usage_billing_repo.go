@@ -185,6 +185,10 @@ func (r *usageBillingRepository) applyUsageBillingEffects(ctx context.Context, t
 		}
 		result.NewBalance = &newBalance
 		result.BalanceOverdrafted = !sufficient
+
+		if err := applyC2CTrade(ctx, tx, cmd); err != nil {
+			return err
+		}
 	}
 
 	if cmd.APIKeyQuotaCost > 0 {

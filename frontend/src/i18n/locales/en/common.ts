@@ -157,6 +157,7 @@ export default {
 
   // Navigation
   nav: {
+	  c2c: 'Token Sharing',
     dashboard: 'Dashboard',
     announcements: 'Announcements',
     apiKeys: 'API Keys',

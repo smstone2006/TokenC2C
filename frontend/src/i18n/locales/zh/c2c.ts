@@ -1,0 +1,30 @@
+export default {
+  c2c: {
+    title: 'TokenC2C 共享池',
+    description: '贡献自己的官方账户赚取额度，或使用池中的 Token。',
+    available: '可用额度',
+    pending: '待结算（24 小时）',
+    buyerRequests: '买方请求',
+    buyerSpend: '买方消费',
+    sellerRequests: '卖方请求',
+    sellerEarnings: '卖方累计收益',
+    addAccount: '添加供应账户',
+    accountName: '账户名称',
+    credentials: '凭证 JSON',
+    credentialsHint: '只接受官方上游；禁止自定义 Base URL。凭证不会在列表或统计接口返回。',
+    dailyLimit: '每日贡献上限（USD，可选）',
+    create: '添加并自动验证',
+    mySupply: '我的供应账户',
+    noAccounts: '还没有供应账户',
+    verify: '重新验证',
+    pause: '暂停供应',
+    resume: '恢复供应',
+    remove: '删除',
+    ledger: '最近账本',
+    noLedger: '暂无账本记录',
+    loadFailed: '加载 C2C 数据失败',
+    saveFailed: '添加账户失败',
+    invalidJSON: '凭证必须是有效的 JSON 对象',
+    confirmDelete: '确认删除这个供应账户？在途交易仍会正常结算。'
+  }
+}

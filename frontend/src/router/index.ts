@@ -241,6 +241,18 @@ const routes: RouteRecordRaw[] = [
     }
   },
   {
+    path: '/c2c',
+    name: 'C2C',
+    component: () => import('@/views/user/C2CView.vue'),
+    meta: {
+      requiresAuth: true,
+      requiresAdmin: false,
+      title: 'Token C2C',
+      titleKey: 'c2c.title',
+      descriptionKey: 'c2c.description'
+    }
+  },
+  {
     path: '/redeem',
     name: 'Redeem',
     component: () => import('@/views/user/RedeemView.vue'),

@@ -157,6 +157,7 @@ export default {
 
   // Navigation
   nav: {
+	  c2c: 'Token 共享',
     dashboard: '仪表盘',
     announcements: '公告',
     apiKeys: 'API 密钥',

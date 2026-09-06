@@ -1,0 +1,30 @@
+export default {
+  c2c: {
+    title: 'TokenC2C Pool',
+    description: 'Contribute an official provider account to earn credit, or consume tokens from the shared pool.',
+    available: 'Available credit',
+    pending: 'Pending (24 hours)',
+    buyerRequests: 'Buyer requests',
+    buyerSpend: 'Buyer spend',
+    sellerRequests: 'Seller requests',
+    sellerEarnings: 'Seller lifetime earnings',
+    addAccount: 'Add supply account',
+    accountName: 'Account name',
+    credentials: 'Credential JSON',
+    credentialsHint: 'Official upstreams only; custom Base URLs are blocked. Credentials are never returned by list or stats APIs.',
+    dailyLimit: 'Daily supply limit (USD, optional)',
+    create: 'Add and auto-verify',
+    mySupply: 'My supply accounts',
+    noAccounts: 'No supply accounts yet',
+    verify: 'Verify again',
+    pause: 'Pause supply',
+    resume: 'Resume supply',
+    remove: 'Delete',
+    ledger: 'Recent ledger',
+    noLedger: 'No ledger entries yet',
+    loadFailed: 'Failed to load C2C data',
+    saveFailed: 'Failed to add account',
+    invalidJSON: 'Credentials must be a valid JSON object',
+    confirmDelete: 'Delete this supply account? In-flight trades will still settle.'
+  }
+}

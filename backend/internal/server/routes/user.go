@@ -82,6 +82,19 @@ func RegisterUserRoutes(
 			keys.DELETE("/:id", h.APIKey.Delete)
 		}
 
+		// C2C token pool: users may manage only accounts they own.
+		c2c := authenticated.Group("/c2c")
+		{
+			c2c.GET("/provider-accounts", h.C2C.ListProviderAccounts)
+			c2c.POST("/provider-accounts", h.C2C.CreateProviderAccount)
+			c2c.POST("/provider-accounts/:id/verify", h.C2C.VerifyProviderAccount)
+			c2c.PUT("/provider-accounts/:id/pool-state", h.C2C.SetPoolState)
+			c2c.DELETE("/provider-accounts/:id", h.C2C.DeleteProviderAccount)
+			c2c.GET("/wallet", h.C2C.Wallet)
+			c2c.GET("/stats", h.C2C.Stats)
+			c2c.GET("/ledger", h.C2C.Ledger)
+		}
+
 		// 用户可用分组（非管理员接口）
 		groups := authenticated.Group("/groups")
 		{

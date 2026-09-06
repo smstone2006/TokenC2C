@@ -1,0 +1,122 @@
+name: subc2c
+
+services:
+  app:
+    build:
+      context: ..
+      dockerfile: Dockerfile
+      args:
+        VERSION: subc2c-mvp
+        GOPROXY: https://proxy.golang.org,direct
+        GOSUMDB: sum.golang.org
+    image: subc2c:local
+    container_name: subc2c-app
+    restart: unless-stopped
+    security_opt:
+      - no-new-privileges:true
+    ports:
+      - "127.0.0.1:${SUBC2C_PORT:-18080}:8080"
+    volumes:
+      - subc2c_app_data:/app/data
+    environment:
+      AUTO_SETUP: "true"
+      SERVER_HOST: 0.0.0.0
+      SERVER_PORT: 8080
+      SERVER_MODE: release
+      RUN_MODE: standard
+      DATABASE_HOST: postgres
+      DATABASE_PORT: 5432
+      DATABASE_USER: subc2c
+      DATABASE_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD is required}
+      DATABASE_DBNAME: subc2c
+      DATABASE_SSLMODE: disable
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      REDIS_PASSWORD: ${REDIS_PASSWORD:?REDIS_PASSWORD is required}
+      ADMIN_EMAIL: ${ADMIN_EMAIL:-admin@subc2c.local}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD:?ADMIN_PASSWORD is required}
+      JWT_SECRET: ${JWT_SECRET:?JWT_SECRET is required}
+      TOTP_ENCRYPTION_KEY: ${TOTP_ENCRYPTION_KEY:?TOTP_ENCRYPTION_KEY is required}
+      TZ: Asia/Shanghai
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "-q", "-T", "5", "-O", "/dev/null", "http://localhost:8080/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 60s
+    networks: [subc2c]
+
+  postgres:
+    image: postgres:18-alpine
+    container_name: subc2c-postgres
+    restart: unless-stopped
+    environment:
+      PGDATA: /var/lib/postgresql/data
+      POSTGRES_USER: subc2c
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD is required}
+      POSTGRES_DB: subc2c
+      TZ: Asia/Shanghai
+    volumes:
+      - subc2c_postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U subc2c -d subc2c"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+    networks: [subc2c]
+
+  redis:
+    image: redis:8-alpine
+    container_name: subc2c-redis
+    restart: unless-stopped
+    environment:
+      REDISCLI_AUTH: ${REDIS_PASSWORD:?REDIS_PASSWORD is required}
+    command: ["redis-server", "--appendonly", "yes", "--appendfsync", "everysec", "--requirepass", "${REDIS_PASSWORD:?REDIS_PASSWORD is required}"]
+    volumes:
+      - subc2c_redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+    networks: [subc2c]
+
+  bootstrap:
+    image: postgres:18-alpine
+    container_name: subc2c-bootstrap
+    restart: "no"
+    environment:
+      PGPASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD is required}
+    depends_on:
+      app:
+        condition: service_healthy
+    command:
+      - sh
+      - -ec
+      - |
+        psql -h postgres -U subc2c -d subc2c -v ON_ERROR_STOP=1 <<'SQL'
+        INSERT INTO settings (key, value, updated_at)
+        VALUES
+          ('registration_enabled', 'true', NOW()),
+          ('invitation_code_enabled', 'true', NOW()),
+          ('email_verify_enabled', 'false', NOW()),
+          ('site_name', 'TokenC2C', NOW()),
+          ('site_subtitle', '共享 Token 账户池', NOW())
+        ON CONFLICT (key) DO UPDATE
+        SET value = EXCLUDED.value, updated_at = NOW();
+        SQL
+    networks: [subc2c]
+
+volumes:
+  subc2c_app_data:
+  subc2c_postgres_data:
+  subc2c_redis_data:
+
+networks:
+  subc2c:
+    driver: bridge
