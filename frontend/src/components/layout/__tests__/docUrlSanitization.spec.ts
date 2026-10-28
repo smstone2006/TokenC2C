@@ -19,7 +19,7 @@ describe('doc_url sanitization', () => {
   })
 
   it('HomeView imports sanitizeUrl', () => {
-    expect(homeViewSource).toContain("import { sanitizeUrl } from '@/utils/url'")
+    expect(homeViewSource).toMatch(/import\s*\{\s*sanitizeUrl\s*\}\s*from\s*['"]@\/utils\/url['"]/)
   })
 
   it('HomeView applies sanitizeUrl to docUrl', () => {

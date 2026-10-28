@@ -1322,7 +1322,7 @@ func isRetryableCodexModelsManifestTransportError(err error) bool {
 	if errors.As(err, &dnsErr) {
 		return true
 	}
-	var goAwayErr http2.GoAwayError
+	var goAwayErr http2.GoAwayError //nolint:staticcheck // SA1019: retain recognition of typed errors from existing x/net callers and wrapped transports.
 	if errors.As(err, &goAwayErr) {
 		return true
 	}

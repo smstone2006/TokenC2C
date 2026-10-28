@@ -136,12 +136,12 @@ func ProvideHTTPServer(cfg *config.Config, router *gin.Engine) *http.Server {
 	// 根据配置决定是否启用 H2C
 	if cfg.Server.H2C.Enabled {
 		h2cConfig := cfg.Server.H2C
-		if err := http2.ConfigureServer(server, &http2.Server{
-			MaxConcurrentStreams:         h2cConfig.MaxConcurrentStreams,
-			IdleTimeout:                  time.Duration(h2cConfig.IdleTimeout) * time.Second,
-			MaxReadFrameSize:             uint32(h2cConfig.MaxReadFrameSize),
-			MaxUploadBufferPerConnection: int32(h2cConfig.MaxUploadBufferPerConnection),
-			MaxUploadBufferPerStream:     int32(h2cConfig.MaxUploadBufferPerStream),
+		if err := http2.ConfigureServer(server, &http2.Server{ //nolint:staticcheck // SA1019: retain the tested H2C adapter; a stdlib-only migration needs separate behavior validation.
+			MaxConcurrentStreams:         h2cConfig.MaxConcurrentStreams,                     //nolint:staticcheck // SA1019: preserve existing H2C limits through the adapter.
+			IdleTimeout:                  time.Duration(h2cConfig.IdleTimeout) * time.Second, //nolint:staticcheck // SA1019: preserve existing H2C idle timeout semantics.
+			MaxReadFrameSize:             uint32(h2cConfig.MaxReadFrameSize),                 //nolint:staticcheck // SA1019: preserve existing H2C frame limits through the adapter.
+			MaxUploadBufferPerConnection: int32(h2cConfig.MaxUploadBufferPerConnection),      //nolint:staticcheck // SA1019: preserve existing H2C flow-control limits.
+			MaxUploadBufferPerStream:     int32(h2cConfig.MaxUploadBufferPerStream),          //nolint:staticcheck // SA1019: preserve existing H2C flow-control limits.
 		}); err != nil {
 			log.Printf("Failed to configure HTTP/2 Cleartext (h2c): %v", err)
 		} else {

@@ -227,7 +227,7 @@ func (s *C2CService) ListProviderAccounts(ctx context.Context, ownerUserID int64
 	if err != nil {
 		return nil, err
 	}
-	defer rows.Close()
+	defer func() { _ = rows.Close() }() // Read-only query; iteration errors are returned via rows.Err().
 	items := make([]C2CProviderAccount, 0)
 	for rows.Next() {
 		item, err := scanC2CProviderAccount(rows)
@@ -430,7 +430,7 @@ func (s *C2CService) Ledger(ctx context.Context, userID int64, limit int) ([]C2C
 	if err != nil {
 		return nil, err
 	}
-	defer rows.Close()
+	defer func() { _ = rows.Close() }() // Read-only query; iteration errors are returned via rows.Err().
 	items := make([]C2CLedgerEntry, 0)
 	for rows.Next() {
 		var item C2CLedgerEntry

@@ -31,6 +31,7 @@ func TestC2CBillingAndMaturityEndToEnd(t *testing.T) {
 	account := mustCreateAccount(t, client, &service.Account{
 		Name: "c2c-supply-" + uuid.NewString(), Platform: service.PlatformOpenAI, Type: service.AccountTypeAPIKey,
 	})
+	cleanupC2CAccountAfterTest(t, account.ID)
 	_, err := integrationDB.ExecContext(ctx, `
 		INSERT INTO c2c_provider_accounts
 			(account_id, owner_user_id, pool_status, verification_status, identity_hash, verified_at)
@@ -105,6 +106,7 @@ func TestC2CBillingSelfMatchKeepsDoubleEntryAndPlatformFee(t *testing.T) {
 	account := mustCreateAccount(t, client, &service.Account{
 		Name: "c2c-self-supply-" + uuid.NewString(), Platform: service.PlatformOpenAI, Type: service.AccountTypeAPIKey,
 	})
+	cleanupC2CAccountAfterTest(t, account.ID)
 	_, err := integrationDB.ExecContext(ctx, `
 		INSERT INTO c2c_provider_accounts
 			(account_id, owner_user_id, pool_status, verification_status, identity_hash, verified_at)
@@ -135,4 +137,26 @@ func TestC2CBillingSelfMatchKeepsDoubleEntryAndPlatformFee(t *testing.T) {
 	require.Equal(t, user.ID, sellerID)
 	require.InDelta(t, charge, earning+fee, 0.00000001)
 	require.InDelta(t, 0.1, fee, 0.00000001)
+}
+
+// These fixtures commit real transactions. Remove their C2C references in FK
+// order so later repository suites can delete users and API keys normally.
+func cleanupC2CAccountAfterTest(t *testing.T, accountID int64) {
+	t.Helper()
+	t.Cleanup(func() {
+		ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
+		defer cancel()
+		tx, err := integrationDB.BeginTx(ctx, nil)
+		require.NoError(t, err)
+		defer func() { _ = tx.Rollback() }()
+		for _, query := range []string{
+			`DELETE FROM c2c_ledger_entries WHERE trade_id IN (SELECT id FROM c2c_trades WHERE account_id = $1)`,
+			`DELETE FROM c2c_trades WHERE account_id = $1`,
+			`DELETE FROM c2c_provider_accounts WHERE account_id = $1`,
+		} {
+			_, err := tx.ExecContext(ctx, query, accountID)
+			require.NoError(t, err, "clean C2C fixture references")
+		}
+		require.NoError(t, tx.Commit())
+	})
 }

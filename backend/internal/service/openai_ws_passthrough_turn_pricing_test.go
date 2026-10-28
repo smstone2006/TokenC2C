@@ -121,7 +121,7 @@ func TestPassthroughIngressReportsTurnStartedBeforeAfterTurnWithoutBeforeTurn(t 
 	// 等待连接自然结束（inter-turn idle 超时），确保 AfterTurn 已提交。
 	_, _ = readPassthroughLifecycleFrame(t, clientConn, 3*time.Second)
 	select {
-	case <-serverErr:
+	case <-serverErr: //nolint:errcheck // Only wait for lifecycle completion after the expected idle timeout.
 	case <-time.After(3 * time.Second):
 		t.Fatal("passthrough ingress did not exit")
 	}
@@ -228,7 +228,7 @@ func testPassthroughIngressFreezesSubsequentTurnBeforeRequestPolicy(t *testing.T
 	_ = clientConn.CloseNow()
 	cancelControl(context.Canceled)
 	select {
-	case <-serverErr:
+	case <-serverErr: //nolint:errcheck // Only wait for lifecycle completion after explicit client cancellation.
 	case <-time.After(3 * time.Second):
 		t.Fatal("passthrough ingress did not exit")
 	}
